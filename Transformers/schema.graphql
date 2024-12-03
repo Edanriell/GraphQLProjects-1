@@ -1,0 +1,23 @@
+"""
+Create a database model from type. Generates: list query, CRUD operations. 
+
+fields that implement types are treated as relations
+"""
+directive @model on OBJECT
+
+"""
+Defines a relationship
+"""
+directive @connection(fromField: String) on FIELD_DEFINITION
+
+type Post @model{
+	content: String!
+	name: String!
+	author: Author! @connection
+}
+
+type Author @model{
+	firstName: String!
+	lastName: String!
+	posts: [Post!] @connection(fromField: "author")
+}

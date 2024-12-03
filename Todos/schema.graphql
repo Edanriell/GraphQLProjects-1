@@ -1,0 +1,47 @@
+type Todo{
+	completed: Boolean
+	title: String!
+	userId: Int!
+	id: Int!
+}
+
+type Query{
+	"""
+	Get list of all available todos
+	"""
+	todos: [Todo!]!
+	"""
+	Get todo by provided id
+	"""
+	getTodoById(
+		id: Int!
+	): Todo
+}
+
+schema{
+	query: Query
+	mutation: Mutation
+}
+
+type Mutation{
+	createTodo(
+		todo: TodoInput!
+	): Todo
+	updateTodo(
+		id: ID!
+		todo: EditTodo!
+	): Todo
+	deleteTodo(
+		id: ID!
+	): Boolean
+}
+
+input TodoInput{
+	title: String!
+	userId: Int!
+}
+
+input EditTodo{
+	completed: Boolean
+	title: String
+}

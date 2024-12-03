@@ -1,0 +1,17 @@
+{
+	"exec":"npm run typings && npm run build || exit 1 && npm run start",
+	"ignore": [
+		".git",
+		"node_modules/**/node_modules",
+		"src/models.ts",
+		"src/zeus",
+		"src/**/*.test.ts"
+	],
+	"watch":[
+		"src",
+		"schema.graphql",
+		"package.json",
+		".env*"
+	],
+	"ext":"ts,mts,cts,graphql,json,js"
+}

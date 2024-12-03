@@ -1,0 +1,323 @@
+interface Dated{
+	createdAt: String!
+	updatedAt: String!
+}
+
+interface Owned{
+	user: User!
+}
+
+interface StringId{
+	_id: String!
+}
+
+type User implements StringId & Dated{
+	username: String!
+	_id: String!
+	createdAt: String!
+	updatedAt: String!
+}
+
+type AuthPayload{
+	token: String!
+	user: User!
+}
+
+type PublicMutation{
+	register(
+		username: String!
+		password: String!
+	): AuthPayload!
+	login(
+		username: String!
+		password: String!
+	): AuthPayload!
+}
+
+type SalonProfile implements StringId & Owned & Dated{
+	name: String!
+	slug: String!
+	_id: String!
+	user: User!
+	createdAt: String!
+	updatedAt: String!
+	services: [Service!]
+}
+
+type SalonOps{
+	createService(
+		service: CreateService!
+	): String
+	serviceOps(
+		_id: String!
+	): ServiceOps
+	update(
+		salon: UpdateSalon!
+	): RegisterResponse
+	delete: Boolean
+	createVisit(
+		visit: CreateVisitFromAdmin!
+	): String
+	visitOps(
+		_id: String!
+	): VisitOps
+	sendMessage(
+		salonClientId: String!
+		message: MessageInput!
+	): Boolean
+}
+
+input CreateSalon{
+	name: String!
+	slug: String!
+}
+
+input UpdateSalon{
+	name: String
+	slug: String
+}
+
+type SalonClient implements StringId & Dated{
+	salon: SalonProfile!
+	visits(
+		filterDates: DateFilter!
+		salonId: String
+	): [Visit!]!
+	_id: String!
+	createdAt: String!
+	updatedAt: String!
+	messageThread: MessageThread!
+	client: Client!
+}
+
+type Visit implements StringId & Dated{
+	_id: String!
+	createdAt: String!
+	updatedAt: String!
+	service: Service!
+	status: VisitStatus!
+	whenDateTime: String!
+	client: Client!
+}
+
+type SalonQuery{
+	me: SalonProfile!
+	clients: [SalonClient!]!
+	visits(
+		filterDates: DateFilter!
+	): [Visit!]!
+	analytics(
+		filterDates: DateFilter!
+	): SalonAnalytics
+	client(
+		_id: String!
+	): SalonClient
+}
+
+input DateFilter{
+	from: String!
+	to: String
+}
+
+type Service implements Dated & StringId{
+	salon: SalonProfile!
+	approximateDurationInMinutes: String!
+	name: String!
+	description: String!
+	price: Int
+	createdAt: String!
+	updatedAt: String!
+	_id: String!
+}
+
+input CreateService{
+	approximateDurationInMinutes: String!
+	name: String!
+	description: String!
+	price: Int
+}
+
+input UpdateService{
+	approximateDurationInMinutes: String
+	name: String
+	description: String
+	price: Int
+}
+
+"""
+Root pipe queries
+"""
+type Query{
+	user: UserQuery
+}
+
+schema{
+	query: Query
+	mutation: Mutation
+}
+
+type Mutation{
+	public: PublicMutation
+	user: UserOps
+}
+
+type ServiceOps{
+	delete: Boolean
+	update(
+		service: UpdateService!
+	): Boolean
+}
+
+enum VisitStatus{
+	CREATED
+	CONFIRMED
+	CANCELED
+	RESCHEDULED
+	COMPLETED
+}
+
+input CreateVisitFromClient{
+	whenDateTime: String!
+	serviceId: String!
+}
+
+input CreateVisitFromAdmin{
+	whenDateTime: String!
+	serviceId: String!
+	clientId: String!
+}
+
+input UpdateVisitFromAdmin{
+	whenDateTime: String
+	serviceId: String
+	userId: String
+}
+
+type VisitOps{
+	update(
+		visit: UpdateVisitFromAdmin!
+	): VisitResponse
+	delete: Boolean
+}
+
+type AnalyticsAmountPerDate{
+	date: String!
+	amount: Int!
+}
+
+type SalonAnalytics{
+	visitsPerDay: [AnalyticsAmountPerDate!]!
+	cashPerDay: [AnalyticsAmountPerDate!]!
+}
+
+type ClientQuery{
+	clients: [SalonClient!]!
+	me: Client!
+	client(
+		_id: String!
+	): SalonClient
+}
+
+type UserOps{
+	registerAsSalon(
+		salon: CreateSalon!
+	): RegisterResponse
+	registerAsClient(
+		client: CreateClient!
+	): RegisterResponse
+	client: ClientOps
+	salon: SalonOps
+}
+
+input CreateClient{
+	firstName: String!
+	lastName: String!
+	email: String
+	phone: String
+}
+
+input UpdateClient{
+	firstName: String
+	lastName: String
+	email: String
+	phone: String
+}
+
+type SalonClientOps{
+	createVisit(
+		visit: CreateVisitFromClient!
+	): VisitResponse
+	sendMessage(
+		message: MessageInput!
+	): Boolean
+}
+
+type ClientOps{
+	update(
+		client: UpdateClient!
+	): RegisterResponse
+	registerToSalon(
+		salonSlug: String!
+	): Boolean
+	salonClientOps(
+		_id: String!
+	): SalonClientOps
+}
+
+enum RegistrationError{
+	EXISTS_WITH_SAME_NAME
+	INVALID_SLUG
+	INVALID_NAME
+}
+
+type RegisterResponse{
+	errors: [RegistrationError!]!
+}
+
+enum VisitError{
+	INVALID_DATE
+}
+
+type VisitResponse{
+	errors: [VisitError!]!
+}
+
+input MessageInput{
+	message: String!
+}
+
+type Message implements Dated & StringId{
+	createdAt: String!
+	updatedAt: String!
+	_id: String!
+	sender: MessageSender!
+	messageThread: MessageThread!
+	message: String!
+}
+
+union MessageSender = SalonClient | SalonProfile
+
+type MessageThread implements StringId & Dated{
+	salonClient: SalonClient!
+	messages: [Message!]!
+	_id: String!
+	createdAt: String!
+	updatedAt: String!
+}
+
+type Client implements StringId & Dated{
+	firstName: String!
+	lastName: String!
+	email: String
+	phone: String
+	user: User!
+	_id: String!
+	createdAt: String!
+	updatedAt: String!
+}
+
+type UserQuery{
+	me: User!
+	salon: SalonQuery
+	client: ClientQuery
+}

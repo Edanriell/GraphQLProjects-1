@@ -1,0 +1,20 @@
+{
+	"name": "chapter-07",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "tsx index.ts"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/node": "^20.14.1",
+		"graphql-js-tree": "^2.0.1",
+		"tsx": "^4.11.2",
+		"typescript": "^5.4.5"
+	},
+	"dependencies": {
+		"prettier": "^3.4.1"
+	}
+}
